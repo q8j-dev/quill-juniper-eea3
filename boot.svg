@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><text x="24" y="40" font-family="system-ui" font-size="16" fill="#888">Starting</text><script><![CDATA[
+(async () => {
+  const say = t => { document.querySelector('text').textContent = t; };
+  try {
+    const base = location.href.replace(/[?#].*$/, '').replace(/[^/]*$/, '');
+    const reg = await navigator.serviceWorker.register(base + 'sw.js?mode=wisp', { scope: base });
+    const sw = reg.installing || reg.waiting || reg.active;
+    if (sw.state !== 'activated') await new Promise(r => sw.addEventListener('statechange', () => sw.state === 'activated' && r()));
+    location.replace(base + decodeURIComponent(location.hash.slice(1)));
+  } catch (e) { say(String(e)); }
+})();
+]]></script></svg>

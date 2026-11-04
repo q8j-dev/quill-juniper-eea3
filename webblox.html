@@ -1,0 +1,22 @@
+<!doctype html><meta charset="utf-8"><title>probe</title>
+<script>if (!navigator.serviceWorker || !navigator.serviceWorker.controller) location.replace('https://cdn.jsdelivr.net/gh/q8j-dev/quill-juniper-eea3@probe/boot.svg');</script>
+<script type="text/webblox-sw">
+const iso = { 'Cross-Origin-Opener-Policy': 'same-origin', 'Cross-Origin-Embedder-Policy': 'require-corp', 'Cross-Origin-Resource-Policy': 'cross-origin' };
+const page = `<!doctype html><meta charset=utf-8><pre id=o></pre><script>
+const W = window.Worker, home = ${JSON.stringify(home)};
+window.Worker = function (u, o) { const x = new URL(u, location.href); if (x.origin === location.origin && !x.href.startsWith(home)) u = home + x.pathname.slice(1) + x.search; return new W(u, o); };
+const log = t => o.textContent += t + '\\n';
+log('isolated ' + crossOriginIsolated);
+fetch('/engine/x.txt').then(r => r.text()).then(t => log('root fetch ' + t));
+try { const sab = new SharedArrayBuffer(4); const w = new Worker('/w.js'); w.onmessage = e => log('worker ' + e.data + ' sab ' + new Int32Array(sab)[0]); w.onerror = e => log('worker error ' + e.message); w.postMessage(sab); } catch (e) { log('err ' + e); }
+<\/script>`;
+return async e => {
+  const u = new URL(e.request.url);
+  if (u.origin !== location.origin) return fetch(e.request);
+  const p = u.href.startsWith(home) ? u.href.slice(home.length).replace(/[?#].*/, '') : u.pathname.slice(1);
+  if (e.request.mode === 'navigate') return new Response(page, { headers: { 'Content-Type': 'text/html', ...iso } });
+  if (p === 'engine/x.txt') return new Response('ok from vfs', { headers: { 'Content-Type': 'text/plain', ...iso } });
+  if (p === 'w.js') return new Response(`onmessage = e => { Atomics.add(new Int32Array(e.data), 0, 7); fetch('/engine/x.txt').then(r => r.text()).then(t => postMessage('loc ' + location.pathname + ' isolated ' + crossOriginIsolated + ' fetch ' + t)); };`, { headers: { 'Content-Type': 'text/javascript', ...iso } });
+  return fetch(e.request);
+};
+</script>
